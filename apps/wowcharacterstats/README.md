@@ -3,9 +3,13 @@ Show statistics for a World of Warcraft character.
 
 Stats shown include 
 - Name 
-- Class(icon) 
+- Class(icon)
+- Character level
+- Character faction
 - Item level
 - Mythic+ rating
 - Raid progress
 
-![WoW Character Stats for Tidbyt](screenshot.png)
+For testing via pixlet serve: http://127.0.0.1:8080/?region=&character=&realm=&client_id=&client_secret=
+
+![WoW Character Stats for Tidbyt](wowcharacterstats.gif)

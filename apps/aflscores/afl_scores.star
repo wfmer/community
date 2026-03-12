@@ -34,6 +34,18 @@ Updated for 2024 season
 
 v2.3
 Making the draw field dynamic in team records - it will only appear if the team has had a draw
+
+v2.4
+Reduced MATCH_CACHE from 24hrs to 6hrs as it wasn't refreshing the data quickly enough. Particularly when there is a quick turnaround between one round ending and another starting
+
+v2.4.1
+Bug fix - needed to convert draws to string value for team records
+
+v2.5
+Updated for 2025 season
+
+v2.5.1
+Handling for Western Bulldogs being referred to as original name of Footscray for their 100th anniversary
 """
 
 load("encoding/json.star", "json")
@@ -43,19 +55,19 @@ load("schema.star", "schema")
 load("time.star", "time")
 
 DEFAULT_TIMEZONE = "Australia/Adelaide"
-DEFAULT_TEAM = "10"  # Geelong
+DEFAULT_TEAM = "10"  # Geelong #gocats
 
-MATCHES_URL = "https://aflapi.afl.com.au/afl/v2/matches?competitionId=1&compSeasonId=62"
-LADDER_URL = "https://aflapi.afl.com.au/afl/v2/compseasons/62/ladders"
-ROUND_URL = "https://aflapi.afl.com.au/afl/v2/matches?competitionId=1&compSeasonId=62&roundNumber="
+MATCHES_URL = "https://aflapi.afl.com.au/afl/v2/matches?competitionId=1&compSeasonId=73"
+LADDER_URL = "https://aflapi.afl.com.au/afl/v2/compseasons/73/ladders"
+ROUND_URL = "https://aflapi.afl.com.au/afl/v2/matches?competitionId=1&compSeasonId=73&roundNumber="
 TEAM_SUFFIX = "&teamId="
 
 SQUIGGLE_PREFIX = "https://api.squiggle.com.au/?q=games;round="
 INCOMPLETE_SUFFIX = ";complete=!100"
 COMPLETE_SUFFIX = ";complete=100"
-YEAR_SUFFIX = ";year=2024"
+YEAR_SUFFIX = ";year=2025"
 
-MATCH_CACHE = 86400
+MATCH_CACHE = 21600
 LADDER_CACHE = 86400
 ROUND_CACHE = 60
 LIVE_CACHE = 30
@@ -102,7 +114,6 @@ def main(config):
 
     # Use the Squiggle API for live games, cache data for 30 secs
     SQUIGGLE_URL = SQUIGGLE_PREFIX + CurrentRound + INCOMPLETE_SUFFIX
-    #print(SQUIGGLE_URL)
 
     LiveData = get_cachable_data(SQUIGGLE_URL, LIVE_CACHE)
     LiveJSON = json.decode(LiveData)
@@ -165,7 +176,7 @@ def main(config):
                     if AwayDraws == 0:
                         AwayRecord = AwayWins + "-" + AwayLosses
                     else:
-                        AwayRecord = AwayWins + "-" + AwayDraws + "-" + AwayLosses
+                        AwayRecord = AwayWins + "-" + str(AwayDraws) + "-" + AwayLosses
 
                 else:
                     HomeRecord = ""
@@ -286,7 +297,7 @@ def main(config):
                         if AwayDraws == 0:
                             AwayRecord = AwayWins + "-" + AwayLosses
                         else:
-                            AwayRecord = AwayWins + "-" + AwayDraws + "-" + AwayLosses
+                            AwayRecord = AwayWins + "-" + str(AwayDraws) + "-" + AwayLosses
 
                     else:
                         HomeRecord = ""
@@ -403,7 +414,7 @@ def main(config):
                     if AwayDraws == 0:
                         AwayRecord = AwayWins + "-" + AwayLosses
                     else:
-                        AwayRecord = AwayWins + "-" + AwayDraws + "-" + AwayLosses
+                        AwayRecord = AwayWins + "-" + str(AwayDraws) + "-" + AwayLosses
 
                 else:
                     HomeRecord = ""
@@ -415,6 +426,7 @@ def main(config):
 
             # We have a live game!
             if status == "LIVE":
+                #print("LIVE")
                 LiveOutput = showLiveGame(CurrentRoundJSON, LiveJSON, IncompleteMatches, x)
                 renderDisplay.extend(LiveOutput)
 
@@ -465,10 +477,30 @@ def showLiveGame(CurrentRoundJSON, LiveJSON, IncompleteMatches, x):
     # loop through matches until we find a match
     for y in range(0, IncompleteMatches, 1):
         SquiggleHome = LiveJSON["games"][y]["hteam"]
+        # print(SquiggleHome)
+        # print(HomeTeamName)
+        # print(AwayTeamName)
 
         # GWS needs some fixing to work for the next condition
+        # Western Bulldogs being referred to as Footscray by AFL website for their 100th year anniversary
+        # Added Indigenous names for teams
         if SquiggleHome == "Greater Western Sydney":
             SquiggleHome = "GWS Giants"
+        if HomeTeamName == "Footscray":
+            HomeTeamName = "Western Bulldogs"
+
+        if HomeTeamName == "Waalitj Marawar":
+            HomeTeamName = "West Coast"
+        if HomeTeamName == "Euro-Yroke":
+            HomeTeamName = "St Kilda"
+        if HomeTeamName == "Kuwarna":
+            HomeTeamName = "Adelaide"
+        if HomeTeamName == "Yartapuulti":
+            HomeTeamName = "Port Adelaide"
+        if HomeTeamName == "Walyalup":
+            HomeTeamName = "Fremantle"
+        if HomeTeamName == "Narrm":
+            HomeTeamName = "Melbourne"
 
         # if we find a match, get the score summary
         # and set LiveMatch to true, we found one!
@@ -558,6 +590,21 @@ def showLiveGame(CurrentRoundJSON, LiveJSON, IncompleteMatches, x):
             # GWS needs some fixing to work for the next condition
             if SquiggleHome == "Greater Western Sydney":
                 SquiggleHome = "GWS Giants"
+            if HomeTeamName == "Footscray":
+                HomeTeamName = "Western Bulldogs"
+
+            if HomeTeamName == "Waalitj Marawar":
+                HomeTeamName = "West Coast"
+            if HomeTeamName == "Euro-Yroke":
+                HomeTeamName = "St Kilda"
+            if HomeTeamName == "Kuwarna":
+                HomeTeamName = "Adelaide"
+            if HomeTeamName == "Yartapuulti":
+                HomeTeamName = "Port Adelaide"
+            if HomeTeamName == "Walyalup":
+                HomeTeamName = "Fremantle"
+            if HomeTeamName == "Narrm":
+                HomeTeamName = "Melbourne"
 
             if HomeTeamName[:5] == SquiggleHome[:5] or AwayTeamName[:5] == SquiggleHome[:5]:
                 CompOutput = showCompletedGame(CompletedJSON, q, True, home_team_abb, away_team_abb, home_team_font, away_team_font, home_team_bkg, away_team_bkg)
