@@ -11,7 +11,7 @@ load("render.star", "render")
 load("schema.star", "schema")
 
 # RTD GTFS-RT feeds are protobuf-only; this proxy converts them to JSON.
-# Source: https://github.com/wfmer/rtd-proxy (Cloud Run, always-on)
+# Deployed on Google Cloud Run (always-on); health: PROXY_URL/health
 PROXY_URL = "https://rtd-proxy-194821693431.us-central1.run.app"
 
 RTD_BLUE = "#003DA5"
