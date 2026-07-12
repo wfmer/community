@@ -49,6 +49,9 @@ def main(config):
             routes[route] = {
                 "headsign": pred.get("headsign", ""),
                 "minutes": pred.get("minutes", 0),
+                # Per-route brand color from static GTFS (fall back to RTD blue)
+                "color": pred.get("color") or RTD_LIGHT_BLUE,
+                "text_color": pred.get("text_color") or "#ffffff",
             }
 
     rows = []
@@ -57,7 +60,7 @@ def main(config):
         info = routes[route]
         minutes = info["minutes"]
         time_str = "Now" if minutes == 0 else "%dm" % minutes
-        rows.append(make_route_row(route, info["headsign"], time_str, urgency_color(minutes, walk_time)))
+        rows.append(make_route_row(route, info["headsign"], time_str, urgency_color(minutes, walk_time), info["color"], info["text_color"]))
 
     return render.Root(
         delay = 100,
@@ -85,13 +88,13 @@ def make_header(stop_name):
         ),
     )
 
-def make_route_row(route, headsign, time_str, color):
+def make_route_row(route, headsign, time_str, color, badge_color, badge_text_color):
     # Layout (64px total): 1px pad + 16px badge + 2px gap + 28px dest + 1px gap + 16px time = 64px
     badge = render.Box(
         width = 16,
         height = 7,
-        color = RTD_LIGHT_BLUE,
-        child = render.Text(content = route[:4], color = "#ffffff", font = "tom-thumb"),
+        color = badge_color,
+        child = render.Text(content = route[:4], color = badge_text_color, font = "tom-thumb"),
     )
 
     # Fixed 16px box prevents overflow; "Now"/"99m" are both 14px at tom-thumb
